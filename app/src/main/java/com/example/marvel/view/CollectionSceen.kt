@@ -6,5 +6,5 @@ import androidx.compose.runtime.Composable
 @Composable
 fun CollectionScreen(){
 
-    Text("CollectionScreenn")
+    Text("CollectionScreen")
 }
