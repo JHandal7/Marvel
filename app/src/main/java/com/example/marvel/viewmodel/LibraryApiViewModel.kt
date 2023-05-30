@@ -21,6 +21,7 @@ class LibraryApiViewModel @Inject constructor(
     val result = repo.characters
     val queryText = MutableStateFlow("")
     private val queryInput = Channel<String>(Channel.CONFLATED)
+    val characterDetails = repo.characterDetails
 
     init {
         retrieveCharacters()
@@ -41,4 +42,7 @@ class LibraryApiViewModel @Inject constructor(
         queryInput.trySend(input)
     }
 
+    fun retrieveSingleCharacter(id: Int) {
+        repo.getSingleCharacter(id)
+    }
 }
