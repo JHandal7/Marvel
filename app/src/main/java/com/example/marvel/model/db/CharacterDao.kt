@@ -25,11 +25,11 @@ interface CharacterDao {
 
 
     @Update
-    fun updateCharacter(character: DbCharacter) {
-    }
+    fun updateCharacter(character: DbCharacter)
+
 
     @Delete
-    fun deleteCharacter(character: DbCharacter) {
+    fun deleteCharacter(character: DbCharacter)
 
-    }
+
 }

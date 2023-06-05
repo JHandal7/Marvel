@@ -1,7 +1,6 @@
 package com.example.marvel
 
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -9,43 +8,30 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Surface
 import androidx.compose.material.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 
-import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.rememberScaffoldState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material.MaterialTheme
 //import androidx.compose.material3.MaterialTheme
 
 
-import androidx.compose.runtime.internal.ComposableLambda
-import androidx.compose.runtime.internal.composableLambda
-import androidx.compose.runtime.internal.composableLambdaInstance
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
-import com.example.marvel.model.api.MarvelApi
-import com.example.marvel.model.api.MarvelApiRepo
 import com.example.marvel.ui.theme.MarvelTheme
 
 import com.example.marvel.view.CharacterDetailScreen
 import com.example.marvel.view.CharactersBottomNav
+import com.example.marvel.viewmodel.CollectionDbViewModel
 import com.example.marvel.view.CollectionScreen
 import com.example.marvel.view.LibraryScreen
 import com.example.marvel.viewmodel.LibraryApiViewModel
-import dagger.Provides
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -61,6 +47,7 @@ sealed class Destination(val route: String) {
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val lvm by viewModels<LibraryApiViewModel>()
+    private val cvm by viewModels<CollectionDbViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,7 +61,7 @@ class MainActivity : ComponentActivity() {
                 )
                 {
                     val navController = rememberNavController()
-                    CharactersScaffold(navController = navController, lvm)
+                    CharactersScaffold(navController = navController, lvm, cvm)
                 }
 
 
@@ -87,7 +74,11 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun CharactersScaffold(navController: NavHostController, lvm: LibraryApiViewModel) {
+fun CharactersScaffold(
+    navController: NavHostController,
+    lvm: LibraryApiViewModel,
+    cvm: CollectionDbViewModel
+) {
 
     val scaffoldState = rememberScaffoldState()
     val ctx = LocalContext.current
@@ -108,7 +99,7 @@ fun CharactersScaffold(navController: NavHostController, lvm: LibraryApiViewMode
                 LibraryScreen(navController, lvm, paddingValues)
             }
             composable(route = Destination.Collection.route) {
-                CollectionScreen()
+               CollectionScreen(cvm, navController)
             }
             /* composable(route = CharacterDetailScreen.route) {
                  CharacterDetailScreen()
@@ -120,7 +111,13 @@ fun CharactersScaffold(navController: NavHostController, lvm: LibraryApiViewMode
                     .show()
                 else {
                     lvm.retrieveSingleCharacter(id)
-                    CharacterDetailScreen(lvm = lvm, paddingValues = paddingValues, navController =navController)
+                    CharacterDetailScreen(
+                        lvm = lvm,
+                        cvm=cvm,
+                        paddingValues = paddingValues,
+                        navController = navController
+
+                    )
 
                 }
             }

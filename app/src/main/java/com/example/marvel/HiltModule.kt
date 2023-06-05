@@ -4,11 +4,13 @@ import android.content.Context
 import androidx.room.Room
 import com.example.marvel.model.api.ApiService
 import com.example.marvel.model.api.MarvelApiRepo
+import com.example.marvel.model.connectivity.ConnectivityMonitor
 import com.example.marvel.model.db.CharacterDao
 import com.example.marvel.model.db.CollectionDb
 import com.example.marvel.model.db.CollectionDbRepo
 import com.example.marvel.model.db.CollectionDbRepoImpl
 import com.example.marvel.model.db.Constants.DB
+import com.example.marvel.model.db.NoteDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,10 +30,17 @@ class HiltModule {
     @Provides
     fun provideCharacterDao(collectionDb: CollectionDb) = collectionDb.characterDao()
 
-    @Provides
-    fun provideDbRepoImpl(characterDao: CharacterDao):CollectionDbRepo=
-        CollectionDbRepoImpl(characterDao)
 
+    @Provides
+    fun provideNoteDao(collectionDb: CollectionDb) = collectionDb.noteDao()
+
+    @Provides
+    fun providesDbRepoImpl(characterDao: CharacterDao, noteDao: NoteDao): CollectionDbRepo =
+        CollectionDbRepoImpl(characterDao, noteDao)
+
+    @Provides
+    fun providesConnectivityManager(@ApplicationContext context: Context) =
+        ConnectivityMonitor.getInstance(context)
 
 
 }

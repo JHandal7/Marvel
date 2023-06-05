@@ -10,7 +10,7 @@ import com.example.marvel.model.CharacterThumbnail
 import com.example.marvel.model.db.Constants.CHARACTER_TABLE
 
 
-@Entity(tableName = CHARACTER_TABLE)
+@Entity(tableName =CHARACTER_TABLE)
 data class DbCharacter(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
@@ -28,7 +28,7 @@ data class DbCharacter(
                 id = 0,
                 apiId = character.id,
                 name = character.name,
-                thumbnail = character.thumbnail?.path + character.thumbnail?.path,
+                thumbnail = character.thumbnail?.path +"."+ character.thumbnail?.extension,
                 comics = character?.comics?.items?.mapNotNull { it.name }?.comicsToString()
                     ?: "no comics",
                 description = character.description

@@ -9,13 +9,15 @@ def apikeyProperties = new Properties()
 apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
 android {
     namespace 'com.example.marvel'
-    compileSdk 33
-
+  //  targetSdkVersion 34
+   compileSdk 33
+   // compileSdkPreview "UpsideDownCake"
     defaultConfig {
         applicationId "com.example.marvel"
         minSdk 24
         targetSdk 33
-        versionCode 1
+     //   targetSdkPreview "UpsideDownCake"
+        versionCode 2
         versionName "1.0"
 
 
@@ -33,6 +35,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
@@ -58,7 +61,7 @@ def nav_version = "2.5.3"
 def coil_version = "2.1.0"
 def lifecycle_version = "2.5.1"
 def retrofit_version = "2.9.0"
-def hilt_version = "2.43.2"
+def hilt_version = "2.46.1"
 def room_version = "2.4.2"
 def compose_ui_version ="1.5.0-alpha04"
 
@@ -66,7 +69,7 @@ def compose_ui_version ="1.5.0-alpha04"
 dependencies{
     implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
-    implementation 'androidx.activity:activity-compose:1.7.1'
+    implementation 'androidx.activity:activity-compose:1.7.2'
     implementation platform('androidx.compose:compose-bom:2022.10.00')
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
@@ -81,6 +84,7 @@ dependencies{
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
     implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
     implementation "com.google.dagger:hilt-android:$hilt_version"
+    implementation 'androidx.core:core-ktx:1.10.1'
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"

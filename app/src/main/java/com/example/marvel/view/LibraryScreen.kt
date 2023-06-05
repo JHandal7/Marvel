@@ -1,4 +1,5 @@
 package com.example.marvel.view
+
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,120 +37,138 @@ import com.example.marvel.CharacterImage
 import com.example.marvel.Destination
 import com.example.marvel.model.CharactersApiResponse
 import com.example.marvel.model.api.NetworkResult
+import com.example.marvel.model.connectivity.ConnectivityObservable
 import com.example.marvel.viewmodel.LibraryApiViewModel
-
 
 
 @Composable
 fun LibraryScreen(
-   navController: NavHostController,
-   vm: LibraryApiViewModel,
-   paddingValues: PaddingValues
+    navController: NavHostController,
+    vm: LibraryApiViewModel,
+    paddingValues: PaddingValues
 ) {
-   
-   val result by vm.result.collectAsState()
-   val text = vm.queryText.collectAsState()
 
-   Column(
-      modifier = Modifier
-         .fillMaxSize()
-         .padding(bottom = paddingValues.calculateBottomPadding()),
-      horizontalAlignment = Alignment.CenterHorizontally
-   ) {
+    val result by vm.result.collectAsState()
+    val text = vm.queryText.collectAsState()
+    val networkAvailable = vm.networkAvailable.observe()
+        .collectAsState(initial = ConnectivityObservable.Status.Available)
 
-      OutlinedTextField(
-         value = text.value,
-         onValueChange = vm::onQueryUpdate,
-         label = { Text(text = "Character search") },
-         placeholder = { Text(text = "Character") },
-         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-      )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = paddingValues.calculateBottomPadding()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (networkAvailable.value == ConnectivityObservable.Status.Unavailable) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Red),
+                horizontalArrangement = Arrangement.Center
 
-      Column(
-         modifier = Modifier.fillMaxSize(),
-         horizontalAlignment = Alignment.CenterHorizontally,
-         verticalArrangement = Arrangement.Center
-      ) {
-         when (result) {
-            is NetworkResult.Initial -> {
-               Text(text = "Search for a character")
+            )
+            {
+                Text(
+                    text = "Network unavailable",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier.padding(16.dp)
+                )
             }
+        }
+        OutlinedTextField(
+            value = text.value,
+            onValueChange = vm::onQueryUpdate,
+            label = { Text(text = "Character search") },
+            placeholder = { Text(text = "Character") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+        )
 
-            is NetworkResult.Success -> {
-               ShowCharactersList(result, navController)
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            when (result) {
+                is NetworkResult.Initial -> {
+                    Text(text = "Search for a character")
+                }
+
+                is NetworkResult.Success -> {
+                    ShowCharactersList(result, navController)
+                }
+
+                is NetworkResult.Loading -> {
+                    CircularProgressIndicator()
+                }
+
+                is NetworkResult.Error -> {
+                    Text(text = "Error: ${result.message}")
+                }
             }
+        }
 
-            is NetworkResult.Loading -> {
-               CircularProgressIndicator()
-            }
-
-            is NetworkResult.Error -> {
-               Text(text = "Error: ${result.message}")
-            }
-         }
-      }
-
-   }
+    }
 }
 
 @Composable
 fun ShowCharactersList(
-   result: NetworkResult<CharactersApiResponse>,
-   navController: NavHostController
+    result: NetworkResult<CharactersApiResponse>,
+    navController: NavHostController
 ) {
-   result.data?.data?.results?.let { characters ->
-      LazyColumn(
-         modifier = Modifier.background(Color.LightGray),
-         verticalArrangement = Arrangement.Top
-      ) {
-         result.data.attributionText?.let {
-            item {
-               AttributionText(text = it)
+    result.data?.data?.results?.let { characters ->
+        LazyColumn(
+            modifier = Modifier.background(Color.LightGray),
+            verticalArrangement = Arrangement.Top
+        ) {
+            result.data.attributionText?.let {
+                item {
+                    AttributionText(text = it)
+                }
             }
-         }
 
-         items(characters) { character ->
-            val imageUrl = character.thumbnail?.path + "." + character.thumbnail?.extension
-            val title = character.name
-            val description = character.description
-            val context = LocalContext.current
-            val id = character.id
+            items(characters) { character ->
+                val imageUrl = character.thumbnail?.path + "." + character.thumbnail?.extension
+                val title = character.name
+                val description = character.description
+                val context = LocalContext.current
+                val id = character.id
 
-            Column(
-               modifier = Modifier
-                  .padding(4.dp)
-                  .clip(RoundedCornerShape(5.dp))
-                  .background(Color.White)
-                  .padding(4.dp)
-                  .fillMaxWidth()
-                  .wrapContentHeight()
-                  .clickable {
-                     if (character.id != null)
-                        navController.navigate(Destination.CharacterDetail.createRoute(id))
-                     else
-                        Toast
-                           .makeText(context, "Character id is null", Toast.LENGTH_SHORT)
-                           .show()
-                  }
-            ) {
-               Row(modifier = Modifier.fillMaxWidth()) {
-                  CharacterImage(
-                     url = imageUrl,
-                     modifier = Modifier
+                Column(
+                    modifier = Modifier
                         .padding(4.dp)
-                        .width(100.dp)
-                  )
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(Color.White)
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .clickable {
+                            if (character.id != null)
+                                navController.navigate(Destination.CharacterDetail.createRoute(id))
+                            else
+                                Toast
+                                    .makeText(context, "Character id is null", Toast.LENGTH_SHORT)
+                                    .show()
+                        }
+                ) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        CharacterImage(
+                            url = imageUrl,
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .width(100.dp)
+                        )
 
-                  Column(modifier = Modifier.padding(4.dp)) {
-                     Text(text = title ?: "", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                  }
-               }
+                        Column(modifier = Modifier.padding(4.dp)) {
+                            Text(text = title ?: "", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                        }
+                    }
 
-               Text(text = description ?: "", maxLines = 4, fontSize = 14.sp)
+                    Text(text = description ?: "", maxLines = 4, fontSize = 14.sp)
+                }
             }
-         }
-      }
-   }
+        }
+    }
 }
 
 /*
